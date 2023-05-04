@@ -6,17 +6,18 @@ import java.awt.event.AWTEventListener;
 import java.util.concurrent.locks.Lock;
 
 public class Main {
-    public static final int WINDOW_SIZE = 2;
+    public static final int WINDOW_SIZE = 100;
 
     public static final int WAIT_TIME_MS = 1500;
 
-    public static void main(String[] args){
+    public static void main(String[] args) {
         VerboseJFrame frame = new VerboseJFrame();
         frame.setSize(WINDOW_SIZE, WINDOW_SIZE);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setUndecorated(true);
         Dimension screensize = Toolkit.getDefaultToolkit().getScreenSize();
         frame.setSize(screensize);
+        frame.setBackground(new Color(0, 0, 0, 128));
         frame.setVisible(true);
         // Wait the specified amount of time before showing the frame
         System.out.println("Waiting " + WAIT_TIME_MS + "ms before showing frame");
@@ -27,7 +28,7 @@ public class Main {
         }
         // Set location to around the mouse
         frame.setVisible(false);
-        frame.setSize(WINDOW_SIZE, WINDOW_SIZE);
+        frame.setBackground(new Color(0, 0, 0, 0));
         Point mouseLocation = MouseInfo.getPointerInfo().getLocation();
         Point windowLocation = new Point(mouseLocation.x - WINDOW_SIZE / 2, mouseLocation.y - WINDOW_SIZE / 2);
         frame.setLocation(windowLocation);
@@ -49,6 +50,13 @@ public class Main {
             e.printStackTrace();
         }
         System.out.println("Adding listener");
+        // The listener calls System.exit(0)
         frame.addAWTEventListener(new LockMechanism.Listener());
+        // On shutdown, trigger the lock
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            public void run() {
+                LockMechanism.lock();
+            }
+        });
     }
 }
